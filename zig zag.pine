@@ -9,6 +9,7 @@ var float lst_top_prc = na , var int lst_top_bar = na
 
 var float pst_bot_prc = na , var int pst_bot_bar = na
 var float lst_bot_prc = na , var int lst_bot_bar = na
+var int big_bar = na
 
 top = ta.pivothigh(dmn , dmn)
 bot = ta.pivotlow (dmn , dmn)
@@ -21,6 +22,7 @@ var line inc = na , var line dec = na ,
 if lst_pvt == "top" or lst_pvt == "bot-top"
     if low <= lst_bot_prc
         if high >= lst_top_prc
+            big_bar := bar_index
             if (high-open) < (open-low)
                 lst_top_prc := high , lst_top_bar := bar_index
                 inc.set_x2(lst_top_bar) , inc.set_y2(lst_top_prc)                
@@ -42,7 +44,7 @@ if lst_pvt == "top" or lst_pvt == "bot-top"
             lst_bot_prc := low   , lst_bot_bar := bar_index
             dec := line.new(lst_top_bar , lst_top_prc , lst_bot_bar , lst_bot_prc , color = color.orange)
     else if high >= lst_top_prc      
-        if bool(bot)
+        if bool(bot) and (na(big_bar) or bar_index[dmn] != big_bar)
             // label.new(bar_index+dmn,high , lst_pvt)
             if bar_index >= (lst_top_bar+dmn+1)
                 lst_pvt := "bot"
@@ -56,7 +58,7 @@ if lst_pvt == "top" or lst_pvt == "bot-top"
             lst_top_prc := high , lst_top_bar := bar_index
             inc.set_x2(lst_top_bar) , inc.set_y2(lst_top_prc)
     else
-        if (bool(bot) and bool(top))
+        if ((bool(bot) and (na(big_bar) or bar_index[dmn] != big_bar)) and (bool(top) and (na(big_bar) or bar_index[dmn] != big_bar)))
             if (open[dmn]-low[dmn]) > (high[dmn]-open[dmn])
                 // lst_top_prc := high[dmn] , lst_top_bar := bar_index[dmn]
                 lst_pvt := "bot"
@@ -71,7 +73,7 @@ if lst_pvt == "top" or lst_pvt == "bot-top"
                 lst_top_prc := high[dmn]   , lst_top_bar := bar_index[dmn]
                 dec := line.new(lst_top_bar , lst_top_prc , lst_bot_bar , lst_bot_prc , color = color.orange)
                 inc := line.new(lst_bot_bar , lst_bot_prc , lst_top_bar , lst_top_prc , color = color.blue)
-        else if bool(bot)
+        else if bool(bot) and (na(big_bar) or bar_index[dmn] != big_bar)
             if bar_index >= (lst_top_bar+dmn+1)
                 lst_pvt := "bot"
                 pst_bot_prc := lst_bot_prc , pst_bot_bar := lst_bot_bar
@@ -83,6 +85,7 @@ if lst_pvt == "top" or lst_pvt == "bot-top"
 else if lst_pvt == "bot" or lst_pvt == "top-bot"
     if high >= lst_top_prc
         if low <= lst_bot_prc
+            big_bar := bar_index
             if (open-low) < (high-open)
                 lst_bot_prc := low , lst_bot_bar := bar_index
                 dec.set_x2(lst_bot_bar) , dec.set_y2(lst_bot_prc)                
@@ -104,7 +107,7 @@ else if lst_pvt == "bot" or lst_pvt == "top-bot"
             lst_top_prc := high   , lst_top_bar := bar_index
             inc := line.new(lst_bot_bar , lst_bot_prc , lst_top_bar , lst_top_prc , color = color.blue)
     else if low  <= lst_bot_prc      
-        if bool(top)
+        if bool(top) and (na(big_bar) or bar_index[dmn] != big_bar)
             // label.new(bar_index+dmn,high , lst_pvt)
             if bar_index >= (lst_bot_bar+dmn+1)
                 lst_pvt := "top"
@@ -118,7 +121,7 @@ else if lst_pvt == "bot" or lst_pvt == "top-bot"
             lst_bot_prc := low  , lst_bot_bar := bar_index
             dec.set_x2(lst_bot_bar) , dec.set_y2(lst_bot_prc)
     else
-        if (bool(top) and bool(bot))
+        if ((bool(top) and (na(big_bar) or bar_index[dmn] != big_bar)) and (bool(bot) and (na(big_bar) or bar_index[dmn] != big_bar)))
             if (open[dmn]-low[dmn]) < (high[dmn]-open[dmn])
                 // lst_bot_prc := low [dmn] , lst_bot_bar := bar_index[dmn]
                 lst_pvt := "top"
@@ -133,7 +136,7 @@ else if lst_pvt == "bot" or lst_pvt == "top-bot"
                 lst_bot_prc := low [dmn]   , lst_bot_bar := bar_index[dmn]
                 inc := line.new(lst_bot_bar , lst_bot_prc , lst_top_bar , lst_top_prc , color = color.blue)
                 dec := line.new(lst_top_bar , lst_top_prc , lst_bot_bar , lst_bot_prc , color = color.orange)
-        else if bool(top)
+        else if bool(top) and (na(big_bar) or bar_index[dmn] != big_bar)
             if bar_index >= (lst_bot_bar+dmn+1)
                 lst_pvt := "top"
                 pst_top_prc := lst_top_prc , pst_top_bar := lst_top_bar
@@ -142,7 +145,7 @@ else if lst_pvt == "bot" or lst_pvt == "top-bot"
 
 
 else if lst_pvt == ""
-    if (bool(top) and bool(bot))
+    if ((bool(top) and (na(big_bar) or bar_index[dmn] != big_bar)) and (bool(bot) and (na(big_bar) or bar_index[dmn] != big_bar)))
         if (open[dmn]-low[dmn]) < (high[dmn]-open[dmn])
             lst_pvt := "bot-top"
             pst_bot_prc := lst_bot_prc , pst_bot_bar := lst_bot_bar
@@ -159,14 +162,14 @@ else if lst_pvt == ""
             lst_bot_prc := low [dmn]   , lst_bot_bar := bar_index[dmn]
             inc := line.new(lst_bot_bar , lst_bot_prc , lst_top_bar , lst_top_prc , color = color.blue)
             dec := line.new(lst_top_bar , lst_top_prc , lst_bot_bar , lst_bot_prc , color = color.orange)
-    else if bool(top)
+    else if bool(top) and (na(big_bar) or bar_index[dmn] != big_bar)
         lst_pvt := "top"
         pst_top_prc := lst_top_prc , pst_top_bar := lst_top_bar
         lst_top_prc := high[dmn]   , lst_top_bar := bar_index[dmn]
         // inc := line.new(lst_bot_bar , lst_bot_prc , lst_top_bar , lst_top_prc , color = color.blue)
-    else if bool(bot)
+    else if bool(bot) and (na(big_bar) or bar_index[dmn] != big_bar)
         lst_pvt := "bot"
         pst_bot_prc := lst_bot_prc , pst_bot_bar := lst_bot_bar
         lst_bot_prc := low [dmn]   , lst_bot_bar := bar_index[dmn]
         // dec := line.new(lst_top_bar , lst_top_prc , lst_bot_bar , lst_bot_prc , color = color.orange)
-
+        
